@@ -49,14 +49,13 @@ public class AuthController : ControllerBase
     /// <param name="host">Base64 encoded host name</param>
     /// <param name="embedded">1 if request came from an embedded app</param>
     /// <returns></returns>
-    [HttpGet]
+    [HttpGet(Name = nameof(Auth))]
     public IActionResult Auth(
         [FromQuery] string shop,
         [FromQuery] string host,
         [FromQuery] string? embedded
     )
     {
-        var qs = Request.Query;
         var isEmbedded = embedded == "1";
 
         // Store Url
