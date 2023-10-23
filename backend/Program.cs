@@ -24,6 +24,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<SessionContext>();
 builder.Services.AddScoped<SessionService>();
+builder.Services.AddScoped<WebhookService>();
 
 builder.Services.AddScoped<IAuthorizationMiddlewareResultHandler, ShopifyAuthorizationHandler>();
 

@@ -68,7 +68,7 @@ public class ShopifyAuthorizationHandler : IAuthorizationMiddlewareResultHandler
             return;
         }
 
-        // Store session to context
+        // Inject session into context
         context.Items[GlobalVariables.TokenContextKey] = session;
         context.Items[GlobalVariables.ShopUrlContextKey] = $"{context.Request.Scheme}://{shop}";
 

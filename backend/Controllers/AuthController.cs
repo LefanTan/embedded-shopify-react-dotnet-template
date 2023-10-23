@@ -42,16 +42,22 @@ public class AuthController : ControllerBase
         _webhookService = webhookService;
     }
 
+    /// <summary>
+    /// Redirects to Shopify's OAuth page to begin the OAuth process.
+    /// </summary>
+    /// <param name="shop">The name of the user's shop.</param>
+    /// <param name="host">Base64 encoded host name</param>
+    /// <param name="embedded">1 if request came from an embedded app</param>
+    /// <returns></returns>
     [HttpGet]
-    public IActionResult Auth()
+    public IActionResult Auth(
+        [FromQuery] string shop,
+        [FromQuery] string host,
+        [FromQuery] string? embedded
+    )
     {
         var qs = Request.Query;
-
-        // The name of the user's shop.
-        var shop = qs["shop"].ToString();
-        // Base64 encoded host name
-        var host = qs["host"].ToString();
-        var isEmbedded = qs["embedded"].ToString() == "1";
+        var isEmbedded = embedded == "1";
 
         // Store Url
         var storeUrl = $"{Request.Scheme}://{shop}";
@@ -97,19 +103,27 @@ public class AuthController : ControllerBase
         }
     }
 
-    [HttpGet("callback", Name = nameof(Redirect))]
-    public async Task<IActionResult> Callback()
+    /// <summary>
+    /// Callback endpoint for Shopify OAuth.
+    /// </summary>
+    /// <param name="code">Authorization Grant Code, if exists</param>
+    /// <param name="shop"></param>
+    /// <param name="host"></param>
+    /// <param name="embedded"></param>
+    /// <returns></returns>
+    [HttpGet("callback", Name = nameof(Callback))]
+    public async Task<IActionResult> Callback(
+        [FromQuery] string? code,
+        [FromQuery] string shop,
+        [FromQuery] string host,
+        [FromQuery] string? embedded
+    )
     {
         var qs = Request.Query;
-
-        // Authorization Grant Code, if exists
-        var code = qs["code"];
-        var shop = qs["shop"];
-        var host = qs["host"];
         var storeUrl = $"{Request.Scheme}://{shop}";
 
         // Base64Decode is a custom extension method
-        var decodedHost = host.ToString().Base64Decode();
+        var decodedHost = host.Base64Decode();
 
         _logger.LogDebug($"Callback Query String: {Request.QueryString}");
 
@@ -159,7 +173,7 @@ public class AuthController : ControllerBase
 
             // If the app is supposed to be embedded, but this request isn't sent from an embedded app,
             // redirect to embedded app url.
-            if (IS_EMBEDDED && qs["embedded"].ToString() != "1")
+            if (IS_EMBEDDED && embedded != "1")
             {
                 // Generate Embedded App Url
                 var embeddedAppUrl =
