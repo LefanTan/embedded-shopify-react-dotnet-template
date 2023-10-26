@@ -167,7 +167,14 @@ public class AuthController : ControllerBase
                 _logger.LogInformation($"Stored Session for shop: {storedSession?.Shop}");
 
                 // Register webhooks
-                await _webhookService.MountWebhookAsync(storeUrl, accessToken);
+                try
+                {
+                    await _webhookService.MountWebhookAsync(storeUrl, accessToken);
+                }
+                catch (Exception)
+                {
+                    _logger.LogInformation("Webhook mounted already");
+                }
             }
 
             // If the app is supposed to be embedded, but this request isn't sent from an embedded app,
